@@ -1,0 +1,3 @@
+[submodule "Sentiment_Analysis_git_module"]
+	path = Sentiment_Analysis_git_module
+	url = https://github.com/AbhinandanRoul/Sentiment-Analysis--Lexicon-Models-vs-Machine-Learning.git
