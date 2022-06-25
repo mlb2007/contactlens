@@ -85,7 +85,7 @@ class RawDocs():
         self.tokenization_pattern = tokenization_pattern
         self.stopwords = stopwords
 
-    def basic_cleaning(self):
+    def basic_cleaning(self, custom_stopwords_list=None):
         # lower-case
         if self.lower_case:
             self.docs = [s.lower() for s in self.docs]
@@ -103,6 +103,10 @@ class RawDocs():
                 self.stopwords = self.stopwords
             else:
                 raise ValueError("Stopwords must be a list of strings")
+
+        if custom_stopwords_list is not None:
+            self.stopwords = set(list(self.stopwords) + custom_stopwords_list)
+            print(f"Extra stop words added:{self.stopwords}")
 
         # split contractions
         if self.contraction_split:
@@ -182,8 +186,7 @@ class RawDocs():
         
         self.tokens = tokens_lower
     
-    def bigram(self, items, joining_char='-'): 
-
+    def bigram(self, items, joining_char='-'):
         """
         Generate bigrams of either items = "tokens", "lemmas" or "stems"
         """
@@ -199,7 +202,27 @@ class RawDocs():
         elif items == "stems":
             self.bigrams = list(map(bigram_join, self.stems))
         else:
-            raise ValueError("Items must be either \'tokens\', \'lemmas\' or \'stems\'.")
+            raise ValueError("bigram():Items must be either \'tokens\', \'lemmas\' or \'stems\'.")
+
+
+    def trigram(self, items, joining_char='-'):
+        """
+        Generate trigrams of either items = "tokens", "lemmas" or "stems"
+        """
+
+        def trigram_join(tok_list):
+            text = nltk.trigrams(tok_list)
+            return list(map(lambda x: x[0] + joining_char + x[1] + joining_char + x[2], text))
+
+        if items == "tokens":
+            self.trigrams = list(map(trigram_join, self.tokens))
+        elif items == "lemmas":
+            self.trigrams = list(map(trigram_join, self.lemmas))
+        elif items == "stems":
+            self.trigrams = list(map(trigram_join, self.stems))
+        else:
+            raise ValueError("trigram(): Items must be either \'tokens\', \'lemmas\' or \'stems\'.")
+
 
 
     def token_clean(self, length=0, punctuation=string.punctuation, numbers=True):
