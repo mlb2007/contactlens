@@ -106,7 +106,6 @@ class RawDocs():
 
         if custom_stopwords_list is not None:
             self.stopwords = set(list(self.stopwords) + custom_stopwords_list)
-            print(f"Extra stop words added:{self.stopwords}")
 
         # split contractions
         if self.contraction_split:
