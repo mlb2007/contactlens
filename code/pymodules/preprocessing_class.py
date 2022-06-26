@@ -223,7 +223,6 @@ class RawDocs():
             raise ValueError("trigram(): Items must be either \'tokens\', \'lemmas\' or \'stems\'.")
 
 
-
     def token_clean(self, length=0, punctuation=string.punctuation, numbers=True):
 
         """
