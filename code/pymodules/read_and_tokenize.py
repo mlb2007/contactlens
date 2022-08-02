@@ -173,7 +173,11 @@ def read_file(filename):
     print(f"Comments after tokenization at index[{test_index}]:\n {prep_comments.docs[test_index]}")
 
     # lower-case text, expand contractions and initialize stopwords list
-    prep_comments.basic_cleaning()
+    stop_lens_list = ['Lens', 'lens', 'Contact-lens', 'Contact-Lens', 'lenses', 'Lenses', 'Contact-Lenses',
+                      'Contact-lenses', 'contact-lens', 'contact-lenses', 'acucue', 'acuvue', 'Acuvue', 'pack',
+                      'box', 'Pack', 'Box', 'Moist', 'moist', 'month', 'trial', 'lens.com', 'Lens.com']
+    prep_comments.basic_cleaning(custom_stopwords_list=stop_lens_list)
+    #prep_comments.basic_cleaning()
 
     # test after explore an example after the basic cleaning has been applied
     print(f"Comments at index[{test_index}] before basic cleaning:\n {comments_data[test_index]}")
@@ -219,6 +223,9 @@ def read_file(filename):
     print("Build the bigram and trigram words for use with topic modeling")
     prep_comments.bigram('tokens')
     prep_comments.trigram('tokens')
+
+    # not sure why this is needed as it does not seem to be used anyway, nevertheless ...
+    df['FINAL_PRODUCT_NAME'] = df.FINAL_PRODUCT_NAME.values[0].strip(" \t")
 
     return prep_comments, df
 
