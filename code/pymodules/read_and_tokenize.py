@@ -19,10 +19,69 @@ from sklearn.model_selection import train_test_split, ParameterGrid
 from sklearn.metrics import multilabel_confusion_matrix, f1_score
 # multiprocessing
 import multiprocess as mp
-# not sure if this is needed, although used below ...
+from sklearn.feature_extraction.text import CountVectorizer
+from keras_preprocessing.sequence import pad_sequences
+from keras.preprocessing.text import Tokenizer
 from keras.utils import to_categorical
-# from https://stackoverflow.com/questions/7370801/how-do-i-measure-elapsed-time-in-python
-from timeit import default_timer as timer
+
+
+def get_token_weights(tokens, gensim_model, num_expected_unique_words=10000, MAX_SEQ_LEN=300):
+    """
+    Prepare RNN inout given test tokens
+    :param tokens: Processed data into token
+    :param gensim_model: this is the word embedding model that must have been created when we train on inputs
+    :param num_expected_unique_words: input obtained from how we trained the RNN model (default = 10000)
+    :param MAX_SEQ_LEN: input obtained from how we trained the model (default = 300)
+    :return: padded ouput that can be used in model.fit() and the gensim weight matrix required for RNN model
+    """
+    # because embedding is independent of tokenization, we integerize our token based on keras tokenizer
+    keras_tokenizer = Tokenizer(num_expected_unique_words, split=",")
+    keras_tokenizer.fit_on_texts(tokens)
+    X = tokens
+    X_train=keras_tokenizer.texts_to_sequences(X) # this converts texts into some numeric sequences
+    X_train_pad=pad_sequences(X_train,maxlen=MAX_SEQ_LEN,padding='post') # this makes the length of all numeric sequences equal
+
+    # extract the word embeddings from the model
+    word_vectors = gensim_model.wv
+    word_vectors_weights = gensim_model.wv.vectors
+    vocab_size, embedding_size = word_vectors_weights.shape
+    gensim_weight_matrix = np.zeros((num_expected_unique_words ,embedding_size))
+    for word, index in keras_tokenizer.word_index.items():
+        if index < num_expected_unique_words: # why ? since index starts with zero
+            try:
+                word_index_in_embedding = word_vectors.key_to_index[word]
+            except KeyError:
+                gensim_weight_matrix[index] = np.zeros(embedding_size)
+            else:
+                gensim_weight_matrix[index] = word_vectors[word_index_in_embedding]
+
+    return X_train_pad, gensim_weight_matrix
+
+
+def create_document_term_matrix(tokens):
+    # count vectorizer
+    # simple auxiliary function to override the preprocessing done by sklearn
+    def do_nothing(doc):
+        return doc
+
+    # create a CountVectorizer object using our preprocessed text
+    # uni gram
+    count_vectorizer = CountVectorizer(encoding='utf-8',
+                                       preprocessor=do_nothing,  # apply no additional preprocessing
+                                       tokenizer=do_nothing,  # apply no additional tokenization
+                                       lowercase=False,
+                                       strip_accents=None,
+                                       stop_words=None,
+                                       ngram_range=(1, 1),  # generate only unigrams
+                                       analyzer='word',  # analysis at the word-level
+                                       # max_df=0.5,              # ignore tokens that have a higher document frequency (can be int or percent)
+                                       # min_df=500,              # ignore tokens that have a lowe document frequency (can be int or percent)
+                                       min_df=10,
+                                       max_features=None,  # we could impose a maximum number of vocabulary terms
+                                       )
+    # transform our preprocessed tokens into a document-term matrix
+    dt_matrix = count_vectorizer.fit_transform(tokens)
+    return dt_matrix, count_vectorizer
 
 
 def find_wordnet_synonyms(word_list, type_of_word=None):
@@ -60,16 +119,21 @@ def read_file(filename):
     """
     Read Excel sheet, tokenize and return object with tokens ...
     """
-    # We don't need these columns
+    print(f"Read sheet 'Scrubbed_data' ...")
+    df_raw = pd.read_excel(filename, sheet_name='Scrubbed_data', index_col='REVIEW_DATE')
+    return process_data_frame(df_raw)
+
+
+def process_data_frame(df):
+    """
+    :param df: Input is any dataframe that contains user data
+    :return: processed tokens and the dataframe processed
+    """
     not_needed_columns = ['OVERALL_RATING', 'COMFORT_RATING', 'VISION_RATING', 'VALUE_FOR_MONEY', 'PROS', 'CONS',
                   'ORIGINAL_SOURCE', 'REPLY_FROM_ACCUVUE',
                   'PRODUCT_LINK', 'WEBSITE']
-
     print(f"Columns dropped: {not_needed_columns}")
-
-    df_raw = pd.read_excel(filename, sheet_name='Scrubbed_data', index_col='REVIEW_DATE')
-    print(f"Read sheet 'Scrubbed_data' ...")
-    df = df_raw.drop(columns = not_needed_columns, axis=1)
+    df = df.drop(columns = not_needed_columns, axis=1)
 
     """
     Let us figure out the gender from the names and drop the names column
