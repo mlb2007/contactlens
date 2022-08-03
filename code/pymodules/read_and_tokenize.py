@@ -9,8 +9,16 @@ import preprocessing_class as pc
 import gender_guesser.detector as gd
 # for dictionary method synonym finder using wordnet
 import nltk
-nltk.download('wordnet')
-nltk.download('omw-1.4')
+
+try:
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('wordnet')
+try:
+    nltk.data.find('corpora/omw-1.4')
+except LookupError:
+    nltk.download('omw-1.4')
+
 from nltk.corpus import wordnet as wn
 
 import numpy as np
