@@ -56,12 +56,10 @@ would
 could
 should
 ought
-not
 a
 an
 the
 and
-but
 if
 or
 because
@@ -113,9 +111,7 @@ most
 other
 some
 such
-no
 nor
-not
 only
 own
 same
@@ -130,7 +126,6 @@ less
 many
 now
 ever
-never
 say
 says
 said

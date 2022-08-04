@@ -55,7 +55,6 @@ would
 could
 should
 ought
-not
 a
 an
 the

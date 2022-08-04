@@ -233,7 +233,7 @@ def process_data_frame(df):
     comments_data = df.COMMENT
     prep_comments = pc.RawDocs(comments_data,  # series of documents
                       lower_case=True,  # whether to lowercase the text in the firs cleaning step
-                      stopwords='long',  # type of stopwords to initialize
+                      stopwords='short',  # type of stopwords to initialize,  'not' is not included
                       contraction_split=True,  # wheter to split contractions or not
                       tokenization_pattern=word_re  # custom tokenization patter
                       )
