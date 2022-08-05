@@ -5,3 +5,6 @@
 .ipynb_checkpoints
 .idea
 .Rproj.user
+*.h5
+*.pyc
+
