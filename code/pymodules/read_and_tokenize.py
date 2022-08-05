@@ -123,23 +123,23 @@ def first_name(x):
     return ret_str
 
 
-def read_file(filename):
+def read_file(filename, stop_words_file='short'):
     """
     Read Excel sheet, tokenize and return object with tokens ...
     """
     print(f"Read sheet 'Scrubbed_data' ...")
     df_raw = pd.read_excel(filename, sheet_name='Scrubbed_data', index_col='REVIEW_DATE')
-    return process_data_frame(df_raw)
+    print(f"Columns:{df_raw.columns}")
+    return process_data_frame(df_raw, stop_words_file)
 
 
-def process_data_frame(df):
+def process_data_frame(df, stop_words_file='short'):
     """
     :param df: Input is any dataframe that contains user data
     :return: processed tokens and the dataframe processed
     """
     not_needed_columns = ['OVERALL_RATING', 'COMFORT_RATING', 'VISION_RATING', 'VALUE_FOR_MONEY', 'PROS', 'CONS',
-                  'ORIGINAL_SOURCE', 'REPLY_FROM_ACCUVUE',
-                  'PRODUCT_LINK', 'WEBSITE']
+                  'ORIGINAL_SOURCE', 'REPLY_FROM_ACCUVUE', 'PRODUCT_LINK', 'WEBSITE']
     print(f"Columns dropped: {not_needed_columns}")
     df = df.drop(columns = not_needed_columns, axis=1)
 
@@ -233,7 +233,7 @@ def process_data_frame(df):
     comments_data = df.COMMENT
     prep_comments = pc.RawDocs(comments_data,  # series of documents
                       lower_case=True,  # whether to lowercase the text in the firs cleaning step
-                      stopwords='short',  # type of stopwords to initialize,  'not' is not included
+                      stopwords=stop_words_file,  # type of stopwords to initialize,  in 'short', 'not' is not included
                       contraction_split=True,  # wheter to split contractions or not
                       tokenization_pattern=word_re  # custom tokenization patter
                       )
@@ -247,7 +247,8 @@ def process_data_frame(df):
     # lower-case text, expand contractions and initialize stopwords list
     stop_lens_list = ['Lens', 'lens', 'Contact-lens', 'Contact-Lens', 'lenses', 'Lenses', 'Contact-Lenses',
                       'Contact-lenses', 'contact-lens', 'contact-lenses', 'acucue', 'acuvue', 'Acuvue', 'pack',
-                      'box', 'Pack', 'Box', 'Moist', 'moist', 'month', 'trial', 'lens.com', 'Lens.com']
+                      'box', 'Pack', 'Box', 'Moist', 'moist', 'month', 'trial', 'lens.com', 'Lens.com', 'contact',
+                      'Contact', 'Contacts', 'contacts', 'eyes', 'years', 'day', 'wear', 'wearing']
     prep_comments.basic_cleaning(custom_stopwords_list=stop_lens_list)
     #prep_comments.basic_cleaning()
 
