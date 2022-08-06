@@ -21,7 +21,7 @@ class NullClassifier(ClassifierMixin, BaseEstimator):
 
         # Store the classes seen during fit
         self.classes_ = unique_labels(y)
-        self.class_prob = y.value_counts()/len(y)
+        self.class_prob = (y.value_counts().sort_index())/len(y)
         self._fitted = True
 
         return self
