@@ -1,0 +1,24 @@
+How to run the Jupyter files:
+
+1. Install Miniconda (Minimal Anaconda distribution of python) from:  https://docs.conda.io/en/latest/miniconda.html
+* Ananconda does not install packages blindly like pip does. It checks the package to
+  be installed against available packages and if there is a conflict, it
+  stops. For proper analysis, we need to maintain integrity of environments
+  and conda makes it easy.
+
+ * Conda is also super useful for making docker images, i.e. for making
+   installable packages, particularly for python projects
+
+2. Get the conda_requirements.yml file attached with this package
+
+3. conda env create -f conda_requirements.yml
+
+4. Now run 
+   > jupyter notebook
+
+from commandline or however jupyter is supposed to be run from you machine
+
+Thanks
+Barry Mukund
+
+
